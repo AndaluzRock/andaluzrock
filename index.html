@@ -1,92 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111827">
-<title>AndaluzRock Player Lab</title>
+<title>Suno Player Lab</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--panel2:#1d2942;--text:#f4f6fb;--muted:#aab5ca;--accent:#e5b94f;--line:#2b3853}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(145deg,#0b1020,#121b2d 60%,#171b2c);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-main{width:min(1000px,calc(100% - 32px));margin:40px auto}header{margin-bottom:24px}.eyebrow{color:var(--accent);font-size:.78rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
-h1{margin:6px 0 4px;font-size:clamp(2rem,5vw,3rem);line-height:1.1}.intro,.muted{color:var(--muted)}.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start}
-.panel{background:rgba(21,29,49,.94);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 18px 50px #0003}h2{margin:0 0 14px;font-size:1.15rem}
-.now{display:flex;gap:16px;align-items:center;margin-bottom:18px}.art{width:88px;height:88px;flex:0 0 88px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#354765,#8c6932);font-size:2rem}
-.track-title{font-size:1.15rem;font-weight:750}.track-sub{color:var(--muted);font-size:.9rem}audio{width:100%;margin:6px 0 12px}
-.controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}button{border:1px solid var(--line);border-radius:999px;padding:10px 14px;background:var(--panel2);color:var(--text);cursor:pointer;font:inherit}
-button:hover{border-color:var(--accent)}button.primary{background:var(--accent);color:#191919;border-color:var(--accent);font-weight:800}button.active{border-color:var(--accent);color:var(--accent)}
-.small{color:var(--muted);font-size:.82rem;margin-top:12px}.list{display:grid;gap:9px}.song{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:#111a2b}
-.song.selected{border-color:var(--accent);background:#202b40}.song-info{min-width:0}.song-name{font-weight:700}.song-type{color:var(--muted);font-size:.8rem}.song button{padding:8px 12px;white-space:nowrap}
-.suno-grid{display:grid;grid-template-columns:1fr;gap:14px}.suno-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:#111a2b}.suno-card h3{margin:0 0 10px;font-size:1rem}
-.suno-frame{width:100%;height:150px;border:0;border-radius:10px;background:#20283a}.status{min-height:1.3em;color:var(--accent);font-size:.85rem;margin-top:10px}
-footer{color:var(--muted);font-size:.8rem;text-align:center;margin:22px 0 8px}
-@media(max-width:720px){main{margin:24px auto}.layout{grid-template-columns:1fr}.panel{padding:17px}}
+:root{color-scheme:dark;--bg:#101114;--panel:#1b1d23;--muted:#a6a9b2;--accent:#d9a441;--line:#30333b}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#101114,#191a20);color:#f5f5f6;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;padding:28px 16px}
+main{max-width:760px;margin:auto}.eyebrow{color:var(--accent);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700}h1{font-size:clamp(2rem,6vw,3rem);margin:.25rem 0}.intro{color:var(--muted);margin:0 0 24px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 14px 40px #0003}.now{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.now small{color:var(--muted)}.tag{border:1px solid #65512d;color:#f0c36c;border-radius:999px;padding:4px 10px;font-size:.75rem}.player{width:100%;height:170px;border:0;border-radius:12px;background:#0b0c0f}.tracks{display:grid;gap:9px}.track{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#15171c;color:inherit;cursor:pointer}.track.active{border-color:var(--accent);background:#282219}.num{color:var(--accent);font-weight:700;width:22px}.track span:last-child{margin-left:auto;color:var(--muted);font-size:.8rem}.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.controls button{border:1px solid var(--line);border-radius:10px;background:#252831;color:#fff;padding:11px 15px;font-weight:600;cursor:pointer}.controls button.primary{background:var(--accent);color:#17130c;border-color:var(--accent)}button:disabled{opacity:.45;cursor:not-allowed}.timer{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}.timer input{width:92px;background:#101217;border:1px solid var(--line);color:#fff;border-radius:8px;padding:9px}.status{color:var(--muted);font-size:.9rem;margin-top:12px;min-height:1.4em}.warning{font-size:.88rem;color:#e6c98e;background:#2b2418;border:1px solid #574629;border-radius:12px;padding:13px;margin-top:16px}.foot{color:#858995;font-size:.78rem;text-align:center;margin:22px 0}
 </style>
 </head>
-<body>
-<main>
-<header><div class="eyebrow">Entorno independiente de pruebas</div><h1>AndaluzRock Player Lab</h1>
-<p class="intro">Prueba de reproducción MP3 desde Cloudflare y reproductores Suno integrados en esta misma página.</p></header>
-<div class="layout">
+<body><main>
+<div class="eyebrow">Experimento independiente</div><h1>Suno Player Lab</h1><p class="intro">Un solo espacio de reproducción para varias canciones Suno. Sin MP3 y sin salir de esta página.</p>
 <section class="panel">
-<h2>Reproductor MP3</h2>
-<div class="now"><div class="art" aria-hidden="true">♫</div><div><div class="track-title" id="current-title">song-13.mp3</div><div class="track-sub" id="current-sub">Pista 1 de 3 · Cloudflare</div></div></div>
-<audio id="audio" controls preload="metadata"></audio>
-<div class="controls"><button id="prev" type="button">⏮ Anterior</button><button id="play" class="primary" type="button">▶ Reproducir</button><button id="next" type="button">Siguiente ⏭</button></div>
-<div class="controls" style="margin-top:11px"><button id="repeat" type="button" aria-pressed="false">↻ Repetir: No</button><button id="autonext" class="active" type="button" aria-pressed="true">⇢ Siguiente: Sí</button></div>
-<div class="status" id="status" role="status"></div>
-<p class="small">El reproductor MP3 controla los archivos de Cloudflare. La repetición y el siguiente automático se aplican a esta lista MP3.</p>
+ <div class="now"><div><small>REPRODUCIENDO</small><div id="currentTitle"><strong>Song 1</strong></div></div><span class="tag">Suno embed</span></div>
+ <iframe id="sunoFrame" class="player" src="https://suno.com/embed/274a7bb9-6257-4991-9eb8-b4a38d515f1a" title="Suno player" allow="autoplay; encrypted-media" loading="eager"></iframe>
+ <div class="controls"><button id="prev">← Anterior</button><button class="primary" id="next">Siguiente →</button><button id="restart">Volver a cargar</button></div>
+ <div class="status" id="status" aria-live="polite">Selecciona una canción. Pulsa Play dentro del reproductor Suno.</div>
 </section>
-<section class="panel"><h2>Lista de MP3</h2><div class="list" id="mp3-list"></div></section>
-<section class="panel" style="grid-column:1/-1">
-<h2>Canciones Suno — reproducción dentro de la página</h2>
-<p class="small">Estos son reproductores integrados de Suno. Pulsa Play aquí: la intención es escuchar sin abandonar esta página.</p>
-<div class="suno-grid" id="suno-list">
-<div class="suno-card"><h3>Canción Suno 1</h3><iframe class="suno-frame" src="https://suno.com/embed/274a7bb9-6257-4991-9eb8-b4a38d515f1a" title="Suno song 1" loading="lazy" allow="autoplay; encrypted-media"></iframe></div>
-<div class="suno-card"><h3>Canción Suno 2</h3><iframe class="suno-frame" src="https://suno.com/embed/0f587a07-150a-4e59-8b68-e64464d7f752" title="Suno song 2" loading="lazy" allow="autoplay; encrypted-media"></iframe></div>
-<div class="suno-card"><h3>Canción Suno 3</h3><iframe class="suno-frame" src="https://suno.com/embed/fa5bc40b-a2fa-4ae7-aabc-33eadf966462" title="Suno song 3" loading="lazy" allow="autoplay; encrypted-media"></iframe></div>
-</div>
-<p class="small">Nota: el audio Suno lo sirve el reproductor de Suno dentro del marco. Esta prueba comprobará si los tres enlaces permiten cargar y reproducir el embed en nuestra web.</p>
+<section class="panel"><div class="now"><strong>Lista de canciones</strong><small id="count">3 canciones</small></div><div class="tracks" id="trackList"></div></section>
+<section class="panel">
+ <strong>Prueba de avance automático (experimental)</strong>
+ <p class="intro" style="margin:6px 0 12px">Introduce la duración aproximada de la canción actual. El temporizador cargará la siguiente al terminar el tiempo indicado.</p>
+ <div class="timer"><label for="minutes">Minutos</label><input id="minutes" type="number" min="0" max="30" value="3"><label for="seconds">Segundos</label><input id="seconds" type="number" min="0" max="59" value="0"><button class="primary" id="startTimer">Iniciar temporizador</button><button id="stopTimer">Detener</button></div>
+ <div class="status" id="timerStatus" aria-live="polite">Temporizador detenido.</div>
+ <div class="warning"><strong>Importante:</strong> este temporizador no sabe si Suno está reproduciendo, pausado o si la canción ha terminado realmente. Es una simulación para probar el cambio automático. No sustituye a un evento oficial de final de reproducción de Suno.</div>
 </section>
-</div>
-<footer>Laboratorio de pruebas · Separado de AtlasIKA · No modifica Supabase ni Cloudflare</footer>
+<p class="foot">Prototipo de laboratorio · No modifica AtlasIKA · Los audios siguen siendo servidos por Suno</p>
 </main>
 <script>
-(() => {
- const tracks=[
-  {title:"song-13.mp3",url:"https://atlasika-stream.eliaskarasu.workers.dev/song-13.mp3"},
-  {title:"song-10.mp3",url:"https://atlasika-stream.eliaskarasu.workers.dev/song-10.mp3"},
-  {title:"song-04.mp3",url:"https://atlasika-stream.eliaskarasu.workers.dev/song-04.mp3"}
- ];
- const audio=document.getElementById("audio"),title=document.getElementById("current-title"),sub=document.getElementById("current-sub"),status=document.getElementById("status"),playBtn=document.getElementById("play"),repeatBtn=document.getElementById("repeat"),autoBtn=document.getElementById("autonext");
- let current=0,repeatOne=false,autoNext=true;
- function render(){
-  const list=document.getElementById("mp3-list");list.innerHTML="";
-  tracks.forEach((track,i)=>{
-   const row=document.createElement("div");row.className="song"+(i===current?" selected":"");
-   const info=document.createElement("div");info.className="song-info";
-   const name=document.createElement("div");name.className="song-name";name.textContent=track.title;
-   const type=document.createElement("div");type.className="song-type";type.textContent="MP3 · Cloudflare";info.append(name,type);
-   const btn=document.createElement("button");btn.type="button";btn.textContent=i===current?"Seleccionada":"Reproducir";btn.addEventListener("click",()=>load(i,true));
-   row.append(info,btn);list.append(row);
-  });
- }
- function load(i,play){
-  current=(i+tracks.length)%tracks.length;const t=tracks[current];audio.src=t.url;title.textContent=t.title;sub.textContent=`Pista ${current+1} de ${tracks.length} · Cloudflare`;status.textContent="";render();
-  if(play)audio.play().catch(()=>status.textContent="No se pudo iniciar el MP3. Pulsa Play en el reproductor.");
-  else playBtn.textContent="▶ Reproducir";
- }
- playBtn.addEventListener("click",()=>{if(audio.paused){if(!audio.src)load(current,false);audio.play().catch(()=>status.textContent="No se pudo reproducir el MP3.");}else audio.pause();});
- document.getElementById("prev").addEventListener("click",()=>load(current-1,true));
- document.getElementById("next").addEventListener("click",()=>load(current+1,true));
- repeatBtn.addEventListener("click",()=>{repeatOne=!repeatOne;audio.loop=repeatOne;repeatBtn.textContent=`↻ Repetir: ${repeatOne?"Sí":"No"}`;repeatBtn.classList.toggle("active",repeatOne);repeatBtn.setAttribute("aria-pressed",String(repeatOne));if(repeatOne){autoNext=false;updateAuto();}});
- autoBtn.addEventListener("click",()=>{autoNext=!autoNext;if(autoNext){repeatOne=false;audio.loop=false;repeatBtn.textContent="↻ Repetir: No";repeatBtn.classList.remove("active");repeatBtn.setAttribute("aria-pressed","false");}updateAuto();});
- function updateAuto(){autoBtn.textContent=`⇢ Siguiente: ${autoNext?"Sí":"No"}`;autoBtn.classList.toggle("active",autoNext);autoBtn.setAttribute("aria-pressed",String(autoNext));}
- audio.addEventListener("ended",()=>{if(repeatOne)return;if(autoNext)load(current+1,true);else playBtn.textContent="▶ Reproducir";});
- audio.addEventListener("play",()=>playBtn.textContent="Ⅱ Pausar");audio.addEventListener("pause",()=>playBtn.textContent="▶ Reproducir");
- audio.addEventListener("error",()=>status.textContent="Error al cargar este MP3. Comprueba el enlace o el servidor.");
- load(0,false);
-})();
-</script>
-</body>
-</html>
+const songs=[
+ {title:'Song 1',id:'274a7bb9-6257-4991-9eb8-b4a38d515f1a'},
+ {title:'Song 2',id:'0f587a07-150a-4e59-8b68-e64464d7f752'},
+ {title:'Song 3',id:'fa5bc40b-a2fa-4ae7-aabc-33eadf966462'}
+];
+let current=0,timer=null,remaining=0,deadline=0,tick=null;
+const frame=document.getElementById('sunoFrame'),title=document.getElementById('currentTitle'),status=document.getElementById('status'),timerStatus=document.getElementById('timerStatus');
+function loadSong(index){current=(index+songs.length)%songs.length;const s=songs[current];frame.src=`https://suno.com/embed/${s.id}`;title.innerHTML='<strong>'+s.title+'</strong>';document.querySelectorAll('.track').forEach((el,i)=>el.classList.toggle('active',i===current));status.textContent='Cargada '+s.title+'. Pulsa Play dentro del reproductor Suno.';stopTimer();}
+function renderList(){const list=document.getElementById('trackList');songs.forEach((s,i)=>{const b=document.createElement('button');b.className='track'+(i===current?' active':'');b.innerHTML='<span class="num">'+String(i+1).padStart(2,'0')+'</span><strong>'+s.title+'</strong><span>Seleccionar</span>';b.addEventListener('click',()=>loadSong(i));list.appendChild(b)});}
+function stopTimer(){if(timer)clearTimeout(timer);if(tick)clearInterval(tick);timer=null;tick=null;timerStatus.textContent='Temporizador detenido.';}
+function startTimer(){stopTimer();const m=Math.max(0,Math.min(30,Number(document.getElementById('minutes').value)||0));const s=Math.max(0,Math.min(59,Number(document.getElementById('seconds').value)||0));remaining=m*60+s;if(remaining<1){timerStatus.textContent='Introduce una duración superior a cero.';return;}deadline=Date.now()+remaining*1000;timerStatus.textContent='Tiempo restante: '+format(remaining);tick=setInterval(()=>{remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));timerStatus.textContent='Tiempo restante: '+format(remaining);},250);timer=setTimeout(()=>{stopTimer();loadSong(current+1);timerStatus.textContent='Tiempo cumplido: se ha cargado la siguiente canción. Pulsa Play en Suno.';},remaining*1000);}
+function format(n){return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')}
+document.getElementById('prev').addEventListener('click',()=>loadSong(current-1));document.getElementById('next').addEventListener('click',()=>loadSong(current+1));document.getElementById('restart').addEventListener('click',()=>loadSong(current));document.getElementById('startTimer').addEventListener('click',startTimer);document.getElementById('stopTimer').addEventListener('click',stopTimer);
+renderList();
+</script></body></html>
