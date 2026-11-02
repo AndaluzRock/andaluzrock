@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>AndaluzRock Player Lab</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#151d31; --panel2:#1d2942; --text:#f4f6fb; --muted:#aab5ca; --accent:#e5b94f; --line:#2b3853; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:linear-gradient(145deg,#0b1020,#121b2d 60%,#171b2c); color:var(--text); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    main { width:min(920px,calc(100% - 32px)); margin:40px auto; }
+    header { margin-bottom:24px; }
+    .eyebrow { color:var(--accent); font-size:.78rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:6px 0 4px; font-size:clamp(2rem,5vw,3rem); line-height:1.1; }
+    .intro { color:var(--muted); margin:0; }
+    .layout { display:grid; grid-template-columns:1.1fr .9fr; gap:18px; align-items:start; }
+    .panel { background:rgba(21,29,49,.94); border:1px solid var(--line); border-radius:18px; padding:22px; box-shadow:0 18px 50px #0003; }
+    h2 { margin:0 0 14px; font-size:1.15rem; }
+    .now { display:flex; gap:16px; align-items:center; margin-bottom:18px; }
+    .art { width:88px; height:88px; flex:0 0 88px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg,#354765,#8c6932); font-size:2rem; }
+    .track-title { font-size:1.15rem; font-weight:750; }
+    .track-sub { color:var(--muted); font-size:.9rem; }
+    audio { width:100%; margin:6px 0 12px; }
+    .controls { display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+    button, a.action { border:1px solid var(--line); border-radius:999px; padding:10px 14px; background:var(--panel2); color:var(--text); cursor:pointer; font:inherit; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:7px; }
+    button:hover, a.action:hover { border-color:var(--accent); }
+    button.primary { background:var(--accent); color:#191919; border-color:var(--accent); font-weight:800; }
+    button.active { border-color:var(--accent); color:var(--accent); }
+    .small { color:var(--muted); font-size:.82rem; margin-top:12px; }
+    .list { display:grid; gap:9px; }
+    .song { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 13px; border:1px solid var(--line); border-radius:12px; background:#111a2b; }
+    .song.selected { border-color:var(--accent); background:#202b40; }
+    .song-info { min-width:0; }
+    .song-name { font-weight:700; }
+    .song-type { color:var(--muted); font-size:.8rem; }
+    .song button { padding:8px 12px; white-space:nowrap; }
+    .suno-list { display:grid; gap:10px; }
+    .suno-item { padding:13px; border:1px solid var(--line); border-radius:12px; background:#111a2b; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .suno-item strong { display:block; }
+    .suno-item span { color:var(--muted); font-size:.8rem; }
+    .status { min-height:1.3em; color:var(--accent); font-size:.85rem; margin-top:10px; }
+    footer { color:var(--muted); font-size:.8rem; text-align:center; margin:22px 0 8px; }
+    @media (max-width:720px) { main{margin:24px auto} .layout{grid-template-columns:1fr} .panel{padding:17px} }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Entorno independiente de pruebas</div>
+    <h1>AndaluzRock Player Lab</h1>
+    <p class="intro">Prueba de reproducción MP3 desde Cloudflare y acceso a canciones originales de Suno.</p>
+  </header>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>Reproductor MP3</h2>
+      <div class="now">
+        <div class="art" aria-hidden="true">♫</div>
+        <div>
+          <div class="track-title" id="current-title">song-13.mp3</div>
+          <div class="track-sub" id="current-sub">Pista 1 de 3 · Cloudflare</div>
+        </div>
+      </div>
+      <audio id="audio" controls preload="metadata"></audio>
+      <div class="controls">
+        <button id="prev" type="button" aria-label="Anterior">⏮ Anterior</button>
+        <button id="play" class="primary" type="button">▶ Reproducir</button>
+        <button id="next" type="button" aria-label="Siguiente">Siguiente ⏭</button>
+      </div>
+      <div class="controls" style="margin-top:11px">
+        <button id="repeat" type="button" aria-pressed="false">↻ Repetir: No</button>
+        <button id="autonext" class="active" type="button" aria-pressed="true">⇢ Siguiente: Sí</button>
+      </div>
+      <div class="status" id="status" role="status"></div>
+      <p class="small">Si el audio no empieza, pulsa Reproducir en el reproductor o comprueba que el enlace MP3 sea accesible desde el navegador.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Lista de MP3</h2>
+      <div class="list" id="mp3-list"></div>
+    </section>
+
+    <section class="panel" style="grid-column:1/-1">
+      <h2>Enlaces originales de Suno</h2>
+      <div class="suno-list" id="suno-list"></div>
+      <p class="small">Estos botones abren la página original de cada canción en una pestaña nueva. No reproducen audio dentro de esta página.</p>
+    </section>
+  </div>
+  <footer>Laboratorio de pruebas · Separado de AtlasIKA · No modifica Supabase ni Cloudflare</footer>
+</main>
+<script>
+(() => {
+  const mp3Tracks = [
+    { title: "song-13.mp3", url: "https://atlasika-stream.eliaskarasu.workers.dev/song-13.mp3" },
+    { title: "song-10.mp3", url: "https://atlasika-stream.eliaskarasu.workers.dev/song-10.mp3" },
+    { title: "song-04.mp3", url: "https://atlasika-stream.eliaskarasu.workers.dev/song-04.mp3" }
+  ];
+  const sunoTracks = [
+    { title: "Canción Suno 1", url: "https://suno.com/song/274a7bb9-6257-4991-9eb8-b4a38d515f1a" },
+    { title: "Canción Suno 2", url: "https://suno.com/song/0f587a07-150a-4e59-8b68-e64464d7f752" },
+    { title: "Canción Suno 3", url: "https://suno.com/song/fa5bc40b-a2fa-4ae7-aabc-33eadf966462" }
+  ];
+
+  const audio = document.getElementById("audio");
+  const title = document.getElementById("current-title");
+  const sub = document.getElementById("current-sub");
+  const status = document.getElementById("status");
+  const playBtn = document.getElementById("play");
+  const repeatBtn = document.getElementById("repeat");
+  const autoBtn = document.getElementById("autonext");
+  let current = 0;
+  let repeatOne = false;
+  let autoNext = true;
+
+  function renderLists() {
+    const list = document.getElementById("mp3-list");
+    list.innerHTML = "";
+    mp3Tracks.forEach((track, index) => {
+      const row = document.createElement("div");
+      row.className = "song" + (index === current ? " selected" : "");
+      const info = document.createElement("div");
+      info.className = "song-info";
+      const name = document.createElement("div");
+      name.className = "song-name";
+      name.textContent = track.title;
+      const type = document.createElement("div");
+      type.className = "song-type";
+      type.textContent = "MP3 · Cloudflare";
+      info.append(name, type);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = index === current ? "Seleccionada" : "Reproducir";
+      btn.addEventListener("click", () => loadTrack(index, true));
+      row.append(info, btn);
+      list.append(row);
+    });
+
+    const sunoList = document.getElementById("suno-list");
+    sunoList.innerHTML = "";
+    sunoTracks.forEach((track, index) => {
+      const row = document.createElement("div");
+      row.className = "suno-item";
+      const info = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = track.title;
+      const detail = document.createElement("span");
+      detail.textContent = "Enlace original de Suno";
+      info.append(name, detail);
+      const link = document.createElement("a");
+      link.className = "action";
+      link.href = track.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Abrir en Suno ↗";
+      row.append(info, link);
+      sunoList.append(row);
+    });
+  }
+
+  function loadTrack(index, shouldPlay) {
+    current = (index + mp3Tracks.length) % mp3Tracks.length;
+    const track = mp3Tracks[current];
+    audio.src = track.url;
+    title.textContent = track.title;
+    sub.textContent = `Pista ${current + 1} de ${mp3Tracks.length} · Cloudflare`;
+    status.textContent = "";
+    renderLists();
+    if (shouldPlay) {
+      audio.play().then(() => {
+        playBtn.textContent = "Ⅱ Pausar";
+      }).catch(() => {
+        status.textContent = "El navegador no pudo iniciar el audio. Pulsa Play en el reproductor.";
+        playBtn.textContent = "▶ Reproducir";
+      });
+    } else {
+      playBtn.textContent = "▶ Reproducir";
+    }
+  }
+
+  playBtn.addEventListener("click", () => {
+    if (audio.paused) {
+      if (!audio.src) loadTrack(current, false);
+      audio.play().then(() => { playBtn.textContent = "Ⅱ Pausar"; })
+        .catch(() => { status.textContent = "No se pudo reproducir. Comprueba el enlace MP3."; });
+    } else {
+      audio.pause();
+      playBtn.textContent = "▶ Reproducir";
+    }
+  });
+  document.getElementById("prev").addEventListener("click", () => loadTrack(current - 1, true));
+  document.getElementById("next").addEventListener("click", () => loadTrack(current + 1, true));
+  repeatBtn.addEventListener("click", () => {
+    repeatOne = !repeatOne;
+    audio.loop = repeatOne;
+    repeatBtn.textContent = `↻ Repetir: ${repeatOne ? "Sí" : "No"}`;
+    repeatBtn.classList.toggle("active", repeatOne);
+    repeatBtn.setAttribute("aria-pressed", String(repeatOne));
+    if (repeatOne) {
+      autoNext = false;
+      updateAutoButton();
+    }
+  });
+  autoBtn.addEventListener("click", () => {
+    autoNext = !autoNext;
+    if (autoNext) {
+      repeatOne = false;
+      audio.loop = false;
+      repeatBtn.textContent = "↻ Repetir: No";
+      repeatBtn.classList.remove("active");
+      repeatBtn.setAttribute("aria-pressed", "false");
+    }
+    updateAutoButton();
+  });
+  function updateAutoButton() {
+    autoBtn.textContent = `⇢ Siguiente: ${autoNext ? "Sí" : "No"}`;
+    autoBtn.classList.toggle("active", autoNext);
+    autoBtn.setAttribute("aria-pressed", String(autoNext));
+  }
+  audio.addEventListener("ended", () => {
+    if (repeatOne) return;
+    if (autoNext) loadTrack(current + 1, true);
+    else playBtn.textContent = "▶ Reproducir";
+  });
+  audio.addEventListener("play", () => { playBtn.textContent = "Ⅱ Pausar"; });
+  audio.addEventListener("pause", () => { playBtn.textContent = "▶ Reproducir"; });
+  audio.addEventListener("error", () => {
+    status.textContent = "Error al cargar este MP3. Puede ser un enlace inaccesible o un problema de respuesta del servidor.";
+  });
+
+  loadTrack(0, false);
+})();
+</script>
+</body>
+</html>
