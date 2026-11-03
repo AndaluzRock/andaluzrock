@@ -2,45 +2,48 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AndaluzRock — Suno Player Lab</title>
+<title>AndaluzRock — Suno Player Lab v2</title>
 <style>
 :root{color-scheme:dark;--bg:#111216;--panel:#1b1d22;--line:#383b44;--red:#df493e;--muted:#b5b7bf}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#111216,#292027);color:#f7f7f8;font:16px/1.45 Arial,sans-serif}
-main{width:min(900px,calc(100% - 30px));margin:38px auto}header{text-align:center;margin-bottom:24px}
+main{width:min(920px,calc(100% - 30px));margin:34px auto}header{text-align:center;margin-bottom:24px}
 .brand{color:var(--red);font-size:13px;font-weight:bold;letter-spacing:.22em}h1{font-size:clamp(30px,5vw,42px);margin:8px 0}
 p{color:var(--muted)}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 16px 45px #0005}
 .row{display:flex;gap:10px;flex-wrap:wrap}input[type=url]{flex:1;min-width:0;padding:13px;border:1px solid var(--line);border-radius:9px;background:#101115;color:white;font-size:15px}
 button{border:0;border-radius:9px;padding:12px 16px;background:var(--red);color:white;font-weight:bold;cursor:pointer}button.secondary{background:#393c45}button:disabled{opacity:.4;cursor:not-allowed}
-.player{margin-top:20px;background:#090a0c;border:1px solid var(--line);border-radius:12px;overflow:hidden}iframe{display:block;width:100%;height:170px;border:0}
+.player{margin-top:18px;background:#090a0c;border:1px solid var(--line);border-radius:12px;overflow:hidden}iframe{display:block;width:100%;height:170px;border:0}
 #trackTitle{font-weight:bold;font-size:18px;margin:18px 0 10px}.controls{display:flex;justify-content:center;gap:10px;margin:16px 0 22px}
 .volume{display:flex;align-items:center;gap:12px;padding:14px;background:#121419;border:1px solid var(--line);border-radius:10px}
-.volume input{flex:1;accent-color:var(--red)}.notice{margin-top:12px;padding:13px;background:#302819;border:1px solid #6a512b;border-radius:10px;color:#f2d7a4;font-size:14px}
+.volume input{flex:1;accent-color:var(--red)}.status{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:14px;color:#d7d9df;background:#15171c}
+.notice{margin-top:12px;padding:13px;background:#302819;border:1px solid #6a512b;border-radius:10px;color:#f2d7a4;font-size:14px}
 ul{list-style:none;padding:0}li{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}li span{flex:1;overflow-wrap:anywhere}li.active{color:#ff9a8f}li button{padding:7px 10px}.small{font-size:13px}
 @media(max-width:560px){main{margin:20px auto}.panel{padding:15px}.row button{width:100%}.controls button{flex:1}}
 </style></head>
 <body><main>
-<header><div class="brand">ANDALUZROCK · LABORATORIO</div><h1>Suno Player</h1><p>Prototipo independiente para probar enlaces compartidos de Suno</p></header>
+<header><div class="brand">ANDALUZROCK · LABORATORIO</div><h1>Suno Player — Prueba 2</h1><p>Experimentos de control del reproductor integrado</p></header>
 <section class="panel">
 <div class="row"><input id="songUrl" type="url" placeholder="Pega un enlace https://suno.com/song/... o /s/..." aria-label="Enlace de Suno"><button id="addBtn">Añadir canción</button></div>
 <p class="small">Añade dos o más enlaces para probar la navegación.</p>
 <div id="trackTitle">No hay canciones en la lista</div>
 <div class="player"><iframe id="sunoFrame" title="Reproductor oficial de Suno" allow="autoplay; encrypted-media; fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <div class="controls"><button class="secondary" id="prevBtn" disabled>⏮ Anterior</button><button id="nextBtn" disabled>Siguiente ⏭</button></div>
-<div class="volume"><span>🔊</span><label for="volumeSlider">Volumen</label><input id="volumeSlider" type="range" min="0" max="100" value="70" disabled><strong>70%</strong></div>
-<div class="notice">El control de volumen queda desactivado por ahora: el audio se reproduce dentro del iframe de Suno. La página externa no puede cambiar su volumen sin una API de control de Suno. No mostraremos un deslizador falso.</div>
+<div class="volume"><span id="volumeIcon">🔊</span><label for="volumeSlider">Volumen</label><input id="volumeSlider" type="range" min="0" max="100" value="70"><strong id="volumeValue">70%</strong></div>
+<div class="status" id="volumeStatus">Volumen: sin control confirmado. El deslizador se habilitará solo si detectamos una respuesta verificable de Suno.</div>
+<div class="notice">Importante: esta versión prueba si el iframe responde a órdenes de volumen/reproducción mediante mensajes. No puede leer el audio interno ni forzar funciones que Suno no exponga. Si no hay respuesta, el volumen seguirá dependiendo del control dentro del reproductor Suno.</div>
 <h2>Lista de reproducción</h2><ul id="playlist"></ul>
-<p class="small">Los botones anterior/siguiente cambian de canción. El avance automático al terminar aún no está disponible: Suno no expone un evento de finalización accesible desde esta página.</p>
+<p class="small">El cambio manual de canción funciona, pero el autoplay y el avance al terminar siguen siendo pruebas pendientes.</p>
 </section></main>
 <script>
 (() => {
- const songs=[]; let current=-1; const el=id=>document.getElementById(id); const frame=el('sunoFrame');
+ const songs=[];let current=-1;let volume=70;let volumeConfirmed=false;let probeTimer=null;
+ const el=id=>document.getElementById(id);const frame=el('sunoFrame');
  function parse(raw){
   let u;try{u=new URL(raw.trim())}catch{return null}
   if(!['suno.com','www.suno.com'].includes(u.hostname))return null;
   const p=u.pathname.split('/').filter(Boolean);let id='';
   if(['s','song','embed'].includes(p[0]))id=p[1]||'';
   if(!/^[a-f0-9-]{20,}$/i.test(id))return null;
-  return {id,embed:'https://suno.com/embed/'+encodeURIComponent(id)};
+  return{id,embed:'https://suno.com/embed/'+encodeURIComponent(id)};
  }
  function render(){
   el('playlist').innerHTML='';
@@ -51,13 +54,47 @@ ul{list-style:none;padding:0}li{display:flex;align-items:center;gap:10px;padding
   });
   el('prevBtn').disabled=current<=0;el('nextBtn').disabled=current<0||current>=songs.length-1;
  }
- function load(i){if(i<0||i>=songs.length)return;current=i;el('trackTitle').textContent=songs[i].label;frame.src=songs[i].embed;render()}
+ function sendExperimentalVolume(v){
+  if(!frame.contentWindow)return;
+  const x=Math.max(0,Math.min(1,v/100));
+  // Experimental protocol probes only. These are NOT documented Suno commands.
+  const messages=[
+   {method:'setVolume',value:x},
+   {command:'setVolume',value:x},
+   {event:'command',func:'setVolume',args:[x]},
+   {type:'setVolume',volume:x},
+   {type:'volume',value:x}
+  ];
+  messages.forEach(data=>{try{frame.contentWindow.postMessage(data,'https://suno.com')}catch(e){}});
+  el('volumeStatus').textContent='Se enviaron mensajes experimentales para '+v+'%. Suno no ha confirmado que los acepte; comprueba si cambia el volumen real.';
+ }
+ function load(i){
+  if(i<0||i>=songs.length)return;
+  current=i;el('trackTitle').textContent=songs[i].label;render();
+  volumeConfirmed=false;el('volumeSlider').disabled=true;
+  el('volumeStatus').textContent='Canción cargada. Probando si Suno acepta órdenes de volumen…';
+  frame.src=songs[i].embed;
+  if(probeTimer)clearTimeout(probeTimer);
+  probeTimer=setTimeout(()=>{if(!volumeConfirmed)el('volumeStatus').textContent='Sin confirmación de Suno. El control externo de volumen no está disponible mediante una interfaz reconocida.'},2500);
+ }
+ // Listen only for messages originating from the embedded Suno frame.
+ window.addEventListener('message',e=>{
+  if(e.source!==frame.contentWindow||e.origin!=='https://suno.com')return;
+  const raw=typeof e.data==='string'?e.data:JSON.stringify(e.data);
+  // Log only; do not mistake arbitrary messages for a volume acknowledgement.
+  console.info('Mensaje recibido del iframe Suno:',raw);
+ });
  el('addBtn').onclick=()=>{
   const parsed=parse(el('songUrl').value);if(!parsed){alert('Enlace Suno no válido. Usa un enlace compartido de Suno.');return}
   if(songs.some(s=>s.id===parsed.id)){alert('Ese enlace ya está en la lista.');return}
-  songs.push({...parsed,label:'Canción '+(songs.length+1)});el('songUrl').value='';if(current===-1)load(0);else render();
+  songs.push({...parsed,label:'Canción '+(songs.length+1)});el('songUrl').value='';
+  if(current===-1)load(0);else render();
  };
  el('songUrl').onkeydown=e=>{if(e.key==='Enter')el('addBtn').click()};
  el('prevBtn').onclick=()=>load(current-1);el('nextBtn').onclick=()=>load(current+1);
+ el('volumeSlider').addEventListener('input',e=>{
+  volume=Number(e.target.value);el('volumeValue').textContent=volume+'%';
+  el('volumeIcon').textContent=volume===0?'🔇':'🔊';sendExperimentalVolume(volume);
+ });
 })();
 </script></body></html>
