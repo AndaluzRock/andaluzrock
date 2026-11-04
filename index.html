@@ -1915,7 +1915,10 @@ async function banChatUser(userId){
                     const normalizedEmail = email.trim().toLowerCase();
                     const { error: otpError } = await chatSupabaseClient.auth.signInWithOtp({
                         email: normalizedEmail,
-                        options: { shouldCreateUser: false }
+                        options: {
+                            shouldCreateUser: false,
+                            emailRedirectTo: 'https://andaluzrock.github.io/andaluzrock/'
+                        }
                     });
                     if (otpError) throw otpError;
 
