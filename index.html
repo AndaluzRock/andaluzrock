@@ -617,6 +617,7 @@ footer { width: 100%; max-width: 1100px; margin: 35px auto 10px; padding: 18px 1
 </select>
 </div>
 <div class="form-group"><label>URL de Portada (Cover)</label><input id="new-col-cover" placeholder="https://..."></div>
+<div class="form-group"><label>URL de Suno (Álbum o Playlist)</label><input id="new-col-suno-url" type="url" placeholder="https://suno.com/playlist/... o https://suno.com/album/..."></div>
 <button class="btn-primary" style="width:100%" onclick="createNewCollection()">Crear Colección</button>
 </div>
 
@@ -991,11 +992,13 @@ const author = document.getElementById('new-col-author').value.trim();
 const style = document.getElementById('new-col-style').value;
 const lang = document.getElementById('new-col-lang').value;
 const coverUrl = document.getElementById('new-col-cover').value.trim();
+const sunoUrl = document.getElementById('new-col-suno-url').value.trim();
 
 if (!name || !coverUrl) { alert("El nombre y la URL de portada son obligatorios."); return; }
 
 const newCol = {
 type, name, author, style, language: lang, cover: coverUrl,
+suno_url: sunoUrl || null,
 tracks: JSON.stringify([])
 };
 
@@ -1006,6 +1009,7 @@ alert("Error al crear: " + error.message);
 alert("Colección creada con éxito.");
 document.getElementById('new-col-name').value = '';
 document.getElementById('new-col-cover').value = '';
+document.getElementById('new-col-suno-url').value = '';
 loadAdminData();
 updateCategoryCounts();
 }
