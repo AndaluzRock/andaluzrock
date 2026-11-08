@@ -40,9 +40,9 @@ async function loadCatalog(){const [s,p,links]=await Promise.all([db.from('songs
 function showHome(type){currentType=type;$('home').classList.remove('hidden');$('detail').classList.add('hidden');$('admin').classList.add('hidden');$('listingTitle').textContent=type==='songs'?'Últimas canciones':type==='album'?'Álbumes':'Playlists';render();}
 function render(){const q=$('search').value.toLowerCase(),g=$('genreFilter').value;let arr;if(currentType==='songs')arr=songs.filter(x=>(!g||x.genre===g)&&(`${x.title} ${x.artist} ${x.country} ${x.genre}`).toLowerCase().includes(q));else arr=collections.filter(x=>x.type===currentType&&(!g||x.genre===g)&&(`${x.name} ${x.artist} ${x.country} ${x.genre}`).toLowerCase().includes(q));$('cards').innerHTML=arr.length?arr.map(x=>`<article class="card" onclick="${currentType==='songs'?`playSingle('${x.id}')`:`openCollection('${x.id}')`}"><img src="${esc(currentType==='songs'?x.cover_url:x.cover_url||'')}" onerror="this.style.opacity=.15" alt=""><h3>${esc(currentType==='songs'?x.title:x.name)}</h3><div class="muted">${esc(x.artist||x.country||'El Sur Canta')}</div><span class="tag">${esc(x.genre||currentType)}</span></article>`).join(''):'<p class="muted">Todavía no hay contenido en esta sección.</p>';}
 function backHome(){ $('detail').classList.add('hidden');$('home').classList.remove('hidden');$('sunoPlayer').src='';}
-function playSingle(id){const s=songs.find(x=>String(x.id)===String(id));if(!s)return;activeTracks=[s];activeIndex=0;activeCollection={name:s.title,artist:s.artist,cover_url:s.cover_url};showDetail();}
+function playSingle(id){const index=songs.findIndex(x=>String(x.id)===String(id));if(index<0)return;activeTracks=songs.slice();activeIndex=index;const s=activeTracks[index];activeCollection={name:s.title,artist:s.artist,cover_url:s.cover_url};showDetail();}
 function openCollection(id){activeCollection=collections.find(x=>String(x.id)===String(id));if(!activeCollection)return;activeTracks=activeCollection.items;activeIndex=0;showDetail();}
-function showDetail(){$('home').classList.add('hidden');$('detail').classList.remove('hidden');$('detailCover').src=activeCollection.cover_url||activeTracks[0]?.cover_url||'';$('detailName').textContent=activeCollection.name;$('detailMeta').textContent=activeCollection.artist||activeCollection.country||'';$('trackList').innerHTML=activeTracks.map((s,i)=>`<button class="track" id="track-${i}" onclick="playAt(${i})"><b>${String(i+1).padStart(2,'0')}</b>${esc(s.title)}<small>${esc(s.artist||'')}</small></button>`).join('');if(activeTracks.length)playAt(0);else $('playingTitle').textContent='Esta colección todavía no tiene canciones.';}
+function showDetail(){$('home').classList.add('hidden');$('detail').classList.remove('hidden');$('detailCover').src=activeCollection.cover_url||activeTracks[0]?.cover_url||'';$('detailName').textContent=activeCollection.name;$('detailMeta').textContent=activeCollection.artist||activeCollection.country||'';$('trackList').innerHTML=activeTracks.map((s,i)=>`<button class="track" id="track-${i}" onclick="playAt(${i})"><b>${String(i+1).padStart(2,'0')}</b>${esc(s.title)}<small>${esc(s.artist||'')}</small></button>`).join('');if(activeTracks.length)playAt(activeIndex);else $('playingTitle').textContent='Esta colección todavía no tiene canciones.';}
 function sunoId(s){
   // Prefer the Suno embed/audio URL stored for the track.
   const candidates=[s.suno_url,s.audio_url,s.url,s.suno_id];
@@ -70,10 +70,12 @@ function playAt(i){
   $('next-button').disabled = i === activeTracks.length - 1;
 }
 function moveTrack(d){
-  const target=activeIndex+d;
-  if(target<0||target>=activeTracks.length) return;
+  const target=activeIndex+Number(d);
+  if(!Number.isInteger(target)||target<0||target>=activeTracks.length) return;
   playAt(target);
 }
+function previousTrack(){moveTrack(-1);}
+function nextTrack(){moveTrack(1);}
 function openAdmin(){$('home').classList.add('hidden');$('detail').classList.add('hidden');$('admin').classList.remove('hidden');}
 function closeAdmin(){showHome(currentType);}
 async function loginAdmin(){const email=$('adminEmail').value.trim(),password=$('adminPass').value;const {data,error}=await db.auth.signInWithPassword({email,password});if(error){$('adminStatus').textContent='Error de acceso: '+error.message;$('adminStatus').classList.remove('hidden');return;}const uid=data.user.id;const check=await db.from('andaluzrock_admins').select('*').eq('user_id',uid).maybeSingle();if(check.error||!check.data){await db.auth.signOut();$('adminStatus').textContent='La cuenta no está autorizada en andaluzrock_admins.';$('adminStatus').classList.remove('hidden');return;}isAdmin=true;$('loginPane').classList.add('hidden');$('adminPane').classList.remove('hidden');loadManage();}
