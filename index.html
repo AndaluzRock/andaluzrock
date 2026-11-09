@@ -1,23 +1,39 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IKA · Prueba reproductor Suno</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IKA · Biblioteca Suno</title>
 <style>
-:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101319;color:#f5f7fb;font:16px system-ui,-apple-system,Segoe UI,sans-serif;padding:28px 16px}.wrap{max-width:760px;margin:auto}h1{font-size:25px;margin:0 0 8px}.sub{color:#b8c7dc;font-size:13px;margin:0 0 22px}.card{background:#1b222e;border:1px solid #354154;border-radius:14px;padding:20px;margin-bottom:16px}h2{font-size:18px;margin:0 0 14px}iframe{display:block;width:100%;height:150px;border:0;border-radius:12px;background:#111722}.note{margin-top:14px;padding:12px;border-radius:9px;background:#111722;font-size:13px;line-height:1.5;color:#dce7f7}.link{display:inline-block;margin-top:12px;color:#a9d2ff;overflow-wrap:anywhere;font-size:13px}
-</style>
-</head>
-<body>
-<main class="wrap">
-<h1>IKA Native Player · Prueba Suno</h1>
-<p class="sub">Prototipo experimental · Sur Canta · Una canción</p>
-<section class="card">
-<h2>Peregrinaje Flamenco — prueba de reproducción</h2>
-<iframe src="https://suno.com/embed/b7daccd4-b5b5-4143-b9ab-0879d6bf24d7" title="Reproductor Suno: Peregrinaje Flamenco" loading="eager" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
-<div class="note">Pulsa Play dentro del reproductor. Este es el reproductor alojado por Suno: el audio lo sirve Suno, no el reproductor nativo de IKA. Esta prueba sirve para confirmar si la canción se escucha integrada en Sur Canta.</div>
-<a class="link" href="https://suno.com/song/b7daccd4-b5b5-4143-b9ab-0879d6bf24d7" target="_blank" rel="noopener">Abrir canción en Suno</a>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101319;color:#f5f7fb;font:15px system-ui,-apple-system,Segoe UI,sans-serif;padding:26px 15px}.wrap{max-width:900px;margin:auto}h1{font-size:25px;margin:0 0 7px}.sub{color:#b8c7dc;font-size:13px;margin:0 0 20px}.card{background:#1b222e;border:1px solid #354154;border-radius:13px;padding:18px;margin:0 0 15px}h2{font-size:18px;margin:0 0 14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.field{flex:1;min-width:210px}label{display:block;font-size:13px;margin:0 0 6px}input,select{width:100%;background:#101722;color:#fff;border:1px solid #40506a;border-radius:7px;padding:11px;font:inherit}button{border:0;border-radius:8px;padding:10px 14px;background:#c5e0ff;color:#102033;font-weight:700;cursor:pointer}button.secondary{background:#354154;color:#fff}button.danger{background:#55343b;color:#fff}.hint,.status{font-size:12px;color:#bdcbe0;line-height:1.5}.status{margin-top:12px;padding:10px;background:#111722;border-radius:8px}.playlist-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.song{border-top:1px solid #354154;padding:17px 0}.song:first-child{border-top:0}.song h3{font-size:16px;margin:0 0 10px}.song iframe{display:block;width:100%;height:150px;border:0;border-radius:10px;background:#111722}.song-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.empty{color:#bdcbe0;font-size:14px;padding:12px 0}.small{font-size:12px;color:#9fb0c8}.hidden{display:none!important}@media(max-width:520px){body{padding:18px 10px}.card{padding:14px}.song iframe{height:150px}}
+</style></head>
+<body><main class="wrap">
+<h1>IKA Suno Library</h1><p class="sub">Prototipo experimental · Sur Canta · Canciones y playlists guardadas en este navegador</p>
+<section class="card"><h2>Añadir canción de Suno</h2>
+<div class="row"><div class="field"><label for="title">Título de la canción</label><input id="title" placeholder="Ej. Peregrinaje Flamenco"></div><div class="field"><label for="songUrl">Enlace individual de Suno</label><input id="songUrl" placeholder="https://suno.com/song/..."></div></div>
+<div class="row" style="margin-top:12px"><div class="field"><label for="targetPlaylist">Añadir a playlist</label><select id="targetPlaylist"></select></div><button id="addSong">Añadir canción</button></div>
+<p class="hint">Pega el enlace individual de una canción (suno.com/song/...). No pegues aquí el enlace de una playlist de Suno. El audio se reproduce mediante el reproductor oficial integrado de Suno.</p><div id="message" class="status" role="status">Las canciones y playlists se guardan en este navegador. No se sincronizan automáticamente con otros dispositivos.</div>
 </section>
+<section class="card"><h2>Crear playlist</h2><div class="row"><div class="field"><label for="playlistName">Nombre de la playlist</label><input id="playlistName" placeholder="Ej. Flamenco"></div><button id="addPlaylist">Crear playlist</button></div></section>
+<section class="card"><div class="playlist-head"><h2 style="margin:0">Mis playlists</h2><select id="viewPlaylist" style="max-width:260px"></select></div><div id="playlistContent"></div></section>
+<p class="small">Nota: cada canción se muestra con su propio reproductor oficial de Suno. Esta versión organiza las canciones por playlists, pero no controla el botón Play de Suno ni garantiza el salto automático entre reproductores.</p>
 </main>
-</body>
-</html>
+<script>
+(()=>{
+const KEY='ikaSunoLibrary_v1';
+const $=id=>document.getElementById(id);
+let db;
+function load(){try{db=JSON.parse(localStorage.getItem(KEY))||null}catch(e){db=null}if(!db||!Array.isArray(db.playlists)){db={playlists:[{id:'all',name:'Todas las canciones',songs:[]}],selected:'all'};}if(!db.playlists.some(p=>p.id==='all'))db.playlists.unshift({id:'all',name:'Todas las canciones',songs:[]});db.playlists.forEach(p=>{if(!Array.isArray(p.songs))p.songs=[]});}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));}
+function uuid(){return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function songId(raw){let s=raw.trim();let m=s.match(/(?:suno\.com\/(?:song|embed)\/)([0-9a-f-]{20,})/i);if(!m&&/^[0-9a-f-]{20,}$/i.test(s))return s;if(m)return m[1];return null;}
+function options(){const target=$('targetPlaylist'),view=$('viewPlaylist');const keep=target.value||'all',v= db.selected||'all';target.innerHTML='';view.innerHTML='';db.playlists.forEach(p=>{if(p.id==='all')return;let a=new Option(p.name,p.id);target.add(a);let b=new Option(p.name,p.id);view.add(b)});if(!db.playlists.some(p=>p.id!=='all')){target.add(new Option('General','all'));view.add(new Option('Todas las canciones','all'));}target.value=db.playlists.some(p=>p.id===keep)?keep:(db.playlists.find(p=>p.id!=='all')?.id||'all');view.value=db.playlists.some(p=>p.id===v)?v:'all';db.selected=view.value;}
+function allSongs(){let out=[];db.playlists.filter(p=>p.id!=='all').forEach(p=>p.songs.forEach(s=>out.push({...s,playlistName:p.name,playlistId:p.id})));return out;}
+function render(){options();let chosen=$('viewPlaylist').value;let songs=chosen==='all'?allSongs():(db.playlists.find(p=>p.id===chosen)?.songs||[]).map(s=>({...s,playlistName:db.playlists.find(p=>p.id===chosen)?.name}));let root=$('playlistContent');root.innerHTML='';if(!songs.length){root.innerHTML='<div class="empty">Todavía no hay canciones en esta playlist. Añade un enlace individual de Suno arriba.</div>';return;}songs.forEach((s,i)=>{let article=document.createElement('article');article.className='song';let h=document.createElement('h3');h.textContent=(i+1)+'. '+s.title;article.append(h);let frame=document.createElement('iframe');frame.src='https://suno.com/embed/'+encodeURIComponent(s.id);frame.title='Reproductor Suno: '+s.title;frame.loading='lazy';frame.allow='autoplay; encrypted-media; fullscreen';frame.allowFullscreen=true;article.append(frame);let actions=document.createElement('div');actions.className='song-actions';let info=document.createElement('span');info.className='small';info.textContent=s.playlistName||'';actions.append(info);let del=document.createElement('button');del.className='danger';del.textContent='Quitar';del.addEventListener('click',()=>removeSong(s.id,s.playlistId||chosen));actions.append(del);article.append(actions);root.append(article);});}
+function msg(t){$('message').textContent=t;}
+function removeSong(id,pid){let p=db.playlists.find(x=>x.id===pid);if(p)p.songs=p.songs.filter(s=>s.id!==id);save();render();msg('Canción quitada de la playlist.');}
+$('addSong').addEventListener('click',()=>{let title=$('title').value.trim(),raw=$('songUrl').value.trim(),id=songId(raw);if(!id){msg('El enlace no parece una canción individual de Suno. Usa un enlace suno.com/song/...');return;}if(!title){msg('Escribe el título de la canción.');return;}let pid=$('targetPlaylist').value;let p=db.playlists.find(x=>x.id===pid);if(!p||p.id==='all'){p=db.playlists.find(x=>x.id!=='all');if(!p){p={id:uuid(),name:'General',songs:[]};db.playlists.push(p);}}if(p.songs.some(s=>s.id===id)){msg('Esta canción ya está en esa playlist.');return;}p.songs.push({id,title,url:'https://suno.com/song/'+id});$('title').value='';$('songUrl').value='';db.selected=p.id;save();render();msg('Canción añadida y guardada.');});
+$('addPlaylist').addEventListener('click',()=>{let name=$('playlistName').value.trim();if(!name){msg('Escribe un nombre para la playlist.');return;}if(db.playlists.some(p=>p.id!=='all'&&p.name.toLowerCase()===name.toLowerCase())){msg('Ya existe una playlist con ese nombre.');return;}let p={id:uuid(),name,songs:[]};db.playlists.push(p);db.selected=p.id;$('playlistName').value='';save();render();msg('Playlist creada.');});
+$('viewPlaylist').addEventListener('change',e=>{db.selected=e.target.value;save();render();});
+load();render();
+})();
+</script></body></html>
